@@ -1,119 +1,180 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
     [Header("Jump Settings")]
     public float jumpForce = 5f;
-    public float maxFallSpeed = -10f;
-    [Header("Rotation Settings")]
-    public float upRotation = 35f;
-    public float downRotation = -60f;
-    public float rotationLerpSpeed = 5f;
+
+    [Header("Start Game Settings")]
+    public static bool GameStarted = false;
+
+    [Header("Health Settings")]
+    public int maxHealth = 3;
+    public int transformAtHP = 2;
+    public Sprite transformedSprite;   // ‚≠ê Sprite ‡πÉ‡∏´‡∏°‡πà
+    private int currentHealth;
+
+    [Header("Invincible Settings")]
+    public float invincibleDuration = 1f;
+    public float blinkSpeed = 0.1f;
+    private bool isInvincible = false;
+
+    [Header("Reset Y Settings")]
+    public float resetY = 0f;
+    public float lockYDuration = 1f;
+    public bool isYLocked = false;
+
     private Rigidbody2D rb;
-    [Header("PlayerStat")]
-    private bool isAlive = true;
-    public int maxHealth = 1;
-    public int currentHealth;
+    private SpriteRenderer sr;
 
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
 
-        if (rb == null)
-        {
-            Debug.LogError("FlappyPlayerController: Rigidbody2D ‰¡Ë∂Ÿ°µ‘¥°—∫ Player!");
-        }
+        rb.gravityScale = 0;   // ‡∏£‡∏≠‡∏Ñ‡∏•‡∏¥‡∏Å‡πÅ‡∏£‡∏Å‡∏Å‡πà‡∏≠‡∏ô‡∏ñ‡∏∂‡∏á‡∏à‡∏∞‡∏ï‡∏Å
     }
+
     private void Start()
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDmg(int dmg)
-    {
-        if (!isAlive) return;
-
-        currentHealth -= dmg;
-
-        Debug.Log("Player took damage. HP = " + currentHealth);
-
-        if (currentHealth <= 0)
-        {
-            Destroy(gameObject);
-        }
-    }
     private void Update()
     {
+        // ‡∏¢‡∏±‡∏á‡πÑ‡∏°‡πà‡πÄ‡∏£‡∏¥‡πà‡∏°‡πÄ‡∏Å‡∏° ‚Üí ‡∏£‡∏≠‡∏Ñ‡∏•‡∏¥‡∏Å‡πÅ‡∏£‡∏Å
+        if (!GameStarted)
+        {
+            if (Input.GetMouseButtonDown(0))
+                StartGame();
+            return;
+        }
 
-        // §≈‘° Mouse 0 ‡æ◊ËÕ°√–‚¥¥
+        // ‡∏ä‡πà‡∏ß‡∏á‡∏•‡πá‡∏≠‡∏Ñ Y ‡∏´‡πâ‡∏≤‡∏°‡∏Å‡∏£‡∏∞‡πÇ‡∏î‡∏î
+        if (isYLocked) return;
+
         if (Input.GetMouseButtonDown(0))
-        {
             Jump();
-        }
-
-        // ª√—∫¡ÿ¡À¡ÿπµ“¡§«“¡‡√Á«·°π Y
-        RotateByVelocity();
     }
 
-    private void FixedUpdate()
-    {
-        if (!isAlive) return;
 
-        // ®”°—¥§«“¡‡√Á«µ°‰¡Ë„ÀÈ‡√Á«‡°‘π‰ª
-        if (rb.linearVelocity.y < maxFallSpeed)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
-        }
+    // ---------------------------------------------------
+    // START GAME
+    // ---------------------------------------------------
+    void StartGame()
+    {
+        GameStarted = true;
+        rb.gravityScale = 2f;
+        Jump();
     }
 
-    private void Jump()
+    // ---------------------------------------------------
+    // JUMP
+    // ---------------------------------------------------
+    void Jump()
     {
-        // √’‡´Áµ§«“¡‡√Á«·°π Y °ËÕπ ·≈È«„ Ë·√ß°√–‚¥¥¢÷Èπ‰ª
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
     }
 
-    private void RotateByVelocity()
-    {
-        // ∂È“°”≈—ß°√–‚¥¥¢÷Èπ -> À¡ÿπ¢÷Èπ
-        // ∂È“°”≈—ßµ° -> À¡ÿπ≈ß
-        float targetAngle;
 
-        if (rb.linearVelocity.y > 0.1f)
+    // ---------------------------------------------------
+    // DAMAGE SYSTEM
+    // ---------------------------------------------------
+    public void TakeDamage(int dmg)
+    {
+        if (isInvincible) return;
+
+        currentHealth -= dmg;
+        Debug.Log("HP = " + currentHealth);
+
+        // ‚≠ê ‡πÄ‡∏õ‡∏•‡∏µ‡πà‡∏¢‡∏ô sprite ‡πÄ‡∏°‡∏∑‡πà‡∏≠‡∏ñ‡∏∂‡∏á HP ‡∏ó‡∏µ‡πà‡∏Å‡∏≥‡∏´‡∏ô‡∏î
+        if (currentHealth == transformAtHP)
+            TransformSprite();
+
+        if (currentHealth > 0)
         {
-            targetAngle = upRotation;
-        }
-        else if (rb.linearVelocity.y < -0.1f)
-        {
-            targetAngle = downRotation;
+            StartCoroutine(InvincibleRoutine());
+            StartCoroutine(ResetAndLockY());
         }
         else
         {
-            targetAngle = 0f;
+            Die();
         }
-
-        // §ËÕ¬ Ê À¡ÿπ‰ªÀ“‡ªÈ“À¡“¬
-        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle);
-        transform.rotation = Quaternion.Lerp(
-            transform.rotation,
-            targetRotation,
-            rotationLerpSpeed * Time.deltaTime
-        );
     }
 
-    public void Die()
+
+    // ---------------------------------------------------
+    // ‚≠ê ‡πÄ‡∏õ‡∏•‡∏µ‡πà‡∏¢‡∏ô Sprite
+    // ---------------------------------------------------
+    void TransformSprite()
     {
-        isAlive = false;
-
-        Debug.Log("Player Died!");
-
-        var rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
+        if (transformedSprite != null)
         {
-            rb.linearVelocity = Vector2.zero;
-            rb.gravityScale = 0;
+            sr.sprite = transformedSprite;
+        }
+    }
+
+
+    // ---------------------------------------------------
+    // INVINCIBLE + BLINK
+    // ---------------------------------------------------
+    IEnumerator InvincibleRoutine()
+    {
+        isInvincible = true;
+
+        float timer = 0f;
+
+        while (timer < invincibleDuration)
+        {
+            sr.enabled = !sr.enabled;
+            yield return new WaitForSeconds(blinkSpeed);
+            timer += blinkSpeed;
         }
 
+        sr.enabled = true;
+        isInvincible = false;
+    }
 
+
+    // ---------------------------------------------------
+    // RESET Y + LOCK Y
+    // ---------------------------------------------------
+    IEnumerator ResetAndLockY()
+    {
+        isYLocked = true;
+
+        rb.gravityScale = 0;
+        rb.linearVelocity = Vector2.zero;
+
+        transform.position = new Vector3(transform.position.x, resetY, transform.position.z);
+
+        yield return new WaitForSeconds(lockYDuration);
+
+        rb.gravityScale = 2f;
+        isYLocked = false;
+    }
+
+
+    // ---------------------------------------------------
+    // DIE
+    // ---------------------------------------------------
+    void Die()
+    {
+        Debug.Log("Player Died!");
+
+        GameStarted = false;
+
+        rb.linearVelocity = Vector2.zero;
+        rb.gravityScale = 0;
+
+        // ‡πÄ‡∏õ‡∏¥‡∏î GameOverUI
+        GameOverUI ui = FindObjectOfType<GameOverUI>();
+        if (ui != null)
+            ui.ShowGameOver();
+
+        // ‡∏õ‡∏¥‡∏î‡∏™‡∏Ñ‡∏£‡∏¥‡∏õ‡∏ï‡πå‡πÄ‡∏û‡∏∑‡πà‡∏≠‡πÑ‡∏°‡πà‡πÉ‡∏´‡πâ‡∏Ç‡∏¢‡∏±‡∏ö‡πÄ‡∏≠‡∏á
+        this.enabled = false;
     }
 }

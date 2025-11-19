@@ -11,6 +11,13 @@ public class ObjSpawner : MonoBehaviour
 
     void Update()
     {
+        if (!Player.GameStarted)
+        {
+            return;
+        }
+
+        if (!Player.GameStarted)
+            return;
         timer += Time.deltaTime;
 
         if (timer >= spawnInterval)

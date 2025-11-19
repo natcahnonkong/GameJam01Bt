@@ -6,7 +6,7 @@ public class TakeDmg : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            other.GetComponent<Player>().TakeDmg(1);
+            other.GetComponent<Player>().TakeDamage(1);
         }
     }
 }
