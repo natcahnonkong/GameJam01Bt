@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     public int maxHealth = 3;
     public int transformAtHP = 2;
     public Sprite transformedSprite;   // ⭐ Sprite ใหม่
-    private int currentHealth;
+    public int currentHealth;
 
     [Header("Invincible Settings")]
     public float invincibleDuration = 1f;
@@ -28,6 +28,9 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
 
+    private Hp_UI Hp_UI;
+
+
 
     private void Awake()
     {
@@ -40,6 +43,8 @@ public class Player : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+        Hp_UI = FindObjectOfType<Hp_UI>();
+
     }
 
     private void Update()
@@ -68,6 +73,9 @@ public class Player : MonoBehaviour
         GameStarted = true;
         rb.gravityScale = 2f;
         Jump();
+        Hp_UI ui = FindObjectOfType<Hp_UI>();
+        if (ui != null)
+            ui.UpdateHearts();
     }
 
     // ---------------------------------------------------
@@ -87,9 +95,12 @@ public class Player : MonoBehaviour
         if (isInvincible) return;
 
         currentHealth -= dmg;
-        Debug.Log("HP = " + currentHealth);
 
-        // ⭐ เปลี่ยน sprite เมื่อถึง HP ที่กำหนด
+        // ⭐ อัปเดต UI หัวใจ
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        // เปลี่ยนสไปรต์เมื่อถึง HP ที่กำหนด
         if (currentHealth == transformAtHP)
             TransformSprite();
 
@@ -103,6 +114,7 @@ public class Player : MonoBehaviour
             Die();
         }
     }
+
 
 
     // ---------------------------------------------------
