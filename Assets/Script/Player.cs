@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     [Header("Health Settings")]
     public int maxHealth = 3;
     public int transformAtHP = 2;
-    public Sprite transformedSprite;   // ⭐ Sprite ใหม่
+    public Sprite transformedSprite;
     public int currentHealth;
 
     [Header("Invincible Settings")]
@@ -30,6 +30,9 @@ public class Player : MonoBehaviour
 
     private Hp_UI Hp_UI;
 
+    [Header("Audio Settings")]
+    public AudioSource audioSource;
+    public AudioClip jumpSFX;
 
 
     private void Awake()
@@ -37,14 +40,13 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        rb.gravityScale = 0;   // รอคลิกแรกก่อนถึงจะตก
+        rb.gravityScale = 0;   // ยังไม่ตกจนกว่าจะคลิกครั้งแรก
     }
 
     private void Start()
     {
         currentHealth = maxHealth;
         Hp_UI = FindObjectOfType<Hp_UI>();
-
     }
 
     private void Update()
@@ -57,11 +59,14 @@ public class Player : MonoBehaviour
             return;
         }
 
-        // ช่วงล็อค Y ห้ามกระโดด
+        // ระหว่างล็อค Y ห้ามกระโดด
         if (isYLocked) return;
 
+        // กดเพื่อกระโดด
         if (Input.GetMouseButtonDown(0))
+        {
             Jump();
+        }
     }
 
 
@@ -72,11 +77,18 @@ public class Player : MonoBehaviour
     {
         GameStarted = true;
         rb.gravityScale = 2f;
-        Jump();
+
+        Jump();  // กระโดดครั้งแรกเมื่อเริ่มเกม
+
+        // เล่นเสียงตอนเริ่มเกมด้วย
+        if (audioSource != null && jumpSFX != null)
+            audioSource.PlayOneShot(jumpSFX);
+
         Hp_UI ui = FindObjectOfType<Hp_UI>();
         if (ui != null)
             ui.UpdateHearts();
     }
+
 
     // ---------------------------------------------------
     // JUMP
@@ -84,6 +96,10 @@ public class Player : MonoBehaviour
     void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+
+        // เล่นเสียงกระโดด
+        if (audioSource != null && jumpSFX != null)
+            audioSource.PlayOneShot(jumpSFX);
     }
 
 
@@ -96,11 +112,9 @@ public class Player : MonoBehaviour
 
         currentHealth -= dmg;
 
-        // ⭐ อัปเดต UI หัวใจ
         if (Hp_UI != null)
             Hp_UI.UpdateHearts();
 
-        // เปลี่ยนสไปรต์เมื่อถึง HP ที่กำหนด
         if (currentHealth == transformAtHP)
             TransformSprite();
 
@@ -118,19 +132,17 @@ public class Player : MonoBehaviour
 
 
     // ---------------------------------------------------
-    // ⭐ เปลี่ยน Sprite
+    // เปลี่ยน Sprite
     // ---------------------------------------------------
     void TransformSprite()
     {
         if (transformedSprite != null)
-        {
             sr.sprite = transformedSprite;
-        }
     }
 
 
     // ---------------------------------------------------
-    // INVINCIBLE + BLINK
+    // INVINCIBLE + กระพริบ
     // ---------------------------------------------------
     IEnumerator InvincibleRoutine()
     {
@@ -181,12 +193,10 @@ public class Player : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         rb.gravityScale = 0;
 
-        // เปิด GameOverUI
         GameOverUI ui = FindObjectOfType<GameOverUI>();
         if (ui != null)
             ui.ShowGameOver();
 
-        // ปิดสคริปต์เพื่อไม่ให้ขยับเอง
         this.enabled = false;
     }
 }
