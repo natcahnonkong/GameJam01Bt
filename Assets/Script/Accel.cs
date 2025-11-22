@@ -1,16 +1,12 @@
 using UnityEngine;
 
-public class Moveleft : MonoBehaviour
+public class Accel : MonoBehaviour
 {
-    public float speed = 2f;
-    public float leftLimit = -15f;
     public static float SpeedMultiplier = 1f;
 
     [Header("Speed Up Settings")]
     public float increaseRate = 0.1f;    // เพิ่ม 0.1 ต่อวินาที
     public float maxSpeed = 10f;          // ไม่ให้เร็วเกิน 3x
-
-
 
     void Update()
     {
@@ -20,15 +16,5 @@ public class Moveleft : MonoBehaviour
         {
             SpeedMultiplier += increaseRate * Time.deltaTime;
         }
-
-        float currentSpeed = speed * SpeedMultiplier;
-
-        transform.position += Vector3.left * currentSpeed * Time.deltaTime;
-
-        Debug.Log(currentSpeed);
-
-        if (transform.position.x < leftLimit)
-            Destroy(gameObject);
-
     }
 }
