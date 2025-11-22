@@ -32,14 +32,14 @@ public class Player : MonoBehaviour
 
     [Header("Audio Settings")]
     public AudioSource audioSource;
-    public AudioClip jumpSFX;
+    public AudioClip jump_sfx;
 
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
-
+        audioSource = GetComponent<AudioSource>();
         rb.gravityScale = 0;   // ยังไม่ตกจนกว่าจะคลิกครั้งแรก
     }
 
@@ -47,6 +47,14 @@ public class Player : MonoBehaviour
     {
         currentHealth = maxHealth;
         Hp_UI = FindObjectOfType<Hp_UI>();
+
+        // อัปเดตหัวใจตอนเริ่มฉาก
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        // รีเซตสถานะต่างๆ เมื่อเริ่ม Scene
+        isInvincible = false;
+        isYLocked = false;
     }
 
     private void Update()
@@ -81,12 +89,11 @@ public class Player : MonoBehaviour
         Jump();  // กระโดดครั้งแรกเมื่อเริ่มเกม
 
         // เล่นเสียงตอนเริ่มเกมด้วย
-        if (audioSource != null && jumpSFX != null)
-            audioSource.PlayOneShot(jumpSFX);
+        if (audioSource != null && jump_sfx != null)
+            audioSource.PlayOneShot(jump_sfx);
 
-        Hp_UI ui = FindObjectOfType<Hp_UI>();
-        if (ui != null)
-            ui.UpdateHearts();
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
     }
 
 
@@ -95,12 +102,17 @@ public class Player : MonoBehaviour
     // ---------------------------------------------------
     void Jump()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        Debug.Log("JUMP CALLED");
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
 
-        // เล่นเสียงกระโดด
-        if (audioSource != null && jumpSFX != null)
-            audioSource.PlayOneShot(jumpSFX);
+        if (audioSource == null)
+            Debug.Log("AUDIO SOURCE = NULL");
+        if (jump_sfx == null)
+            Debug.Log("JUMP SFX = NULL");
+
+        audioSource.Play();
     }
+
 
 
     // ---------------------------------------------------
@@ -130,9 +142,8 @@ public class Player : MonoBehaviour
     }
 
 
-
     // ---------------------------------------------------
-    // เปลี่ยน Sprite
+    // เปลี่ยน Sprite เมื่อ HP ลดถึงค่าที่กำหนด
     // ---------------------------------------------------
     void TransformSprite()
     {
@@ -170,7 +181,7 @@ public class Player : MonoBehaviour
         isYLocked = true;
 
         rb.gravityScale = 0;
-        rb.linearVelocity = Vector2.zero;
+        rb.velocity = Vector2.zero;
 
         transform.position = new Vector3(transform.position.x, resetY, transform.position.z);
 
@@ -190,7 +201,7 @@ public class Player : MonoBehaviour
 
         GameStarted = false;
 
-        rb.linearVelocity = Vector2.zero;
+        rb.velocity = Vector2.zero;
         rb.gravityScale = 0;
 
         GameOverUI ui = FindObjectOfType<GameOverUI>();
