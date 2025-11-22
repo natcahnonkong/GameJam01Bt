@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Hp_UI : MonoBehaviour
 {
@@ -13,17 +12,14 @@ public class Hp_UI : MonoBehaviour
 
     void Start()
     {
-        UpdateHearts();
+        
     }
 
     public void UpdateHearts()
-
     {
-        StartCoroutine(InitHearts());
         // ลบหัวใจทั้งหมดก่อน
         foreach (var h in hearts)
             Destroy(h);
-            StartCoroutine(InitHearts());
 
         hearts.Clear();
 
@@ -32,12 +28,6 @@ public class Hp_UI : MonoBehaviour
         {
             GameObject newHeart = Instantiate(heartPrefab, heartContainer);
             hearts.Add(newHeart);
-        }
-
-        IEnumerator InitHearts()
-        {
-            yield return null; // รอ 1 เฟรมเพื่อให้ Player โหลดครบ
-            UpdateHearts();
         }
     }
 }
