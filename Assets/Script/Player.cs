@@ -158,6 +158,17 @@ public class Player : MonoBehaviour
             StartCoroutine(InvincibleRoutine());
             StartCoroutine(ResetAndLockY());
         }
+        if (currentHealth >= 5)
+        {
+            WinUI win = FindObjectOfType<WinUI>();
+            if (win != null)
+                win.ShowWin();
+
+            GameStarted = false;
+            rb.linearVelocity = Vector2.zero;
+            rb.gravityScale = 0;
+            this.enabled = false;
+        }
         else
         {
             Die();

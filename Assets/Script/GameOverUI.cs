@@ -20,6 +20,6 @@ public class GameOverUI : MonoBehaviour
     public void BackToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Main");
+        SceneManager.LoadScene("Menu");
     }
 }
