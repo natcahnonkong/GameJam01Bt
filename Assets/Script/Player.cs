@@ -104,7 +104,7 @@ public class Player : MonoBehaviour
     void Jump()
     {
         Debug.Log("JUMP CALLED");
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
 
         if (audioSource == null)
             Debug.Log("AUDIO SOURCE = NULL");
@@ -215,7 +215,7 @@ public class Player : MonoBehaviour
         isYLocked = true;
 
         rb.gravityScale = 0;
-        rb.velocity = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
 
         transform.position = new Vector3(transform.position.x, resetY, transform.position.z);
 
@@ -235,7 +235,7 @@ public class Player : MonoBehaviour
 
         GameStarted = false;
 
-        rb.velocity = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
         rb.gravityScale = 0;
 
         GameOverUI ui = FindObjectOfType<GameOverUI>();
