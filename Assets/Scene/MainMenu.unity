@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 237951009}
   - component: {fileID: 237951008}
   m_Layer: 5
-  m_Name: start
+  m_Name: StartGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -328,7 +328,7 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
-  m_UseSpriteMesh: 0
+  m_UseSpriteMesh: 1
   m_PixelsPerUnitMultiplier: 1
 --- !u!222 &237951010
 CanvasRenderer:
