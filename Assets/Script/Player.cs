@@ -84,6 +84,7 @@ public class Player : MonoBehaviour
     void StartGame()
     {
         GameStarted = true;
+        Debug.Log("GAME STARTED!!");
         rb.gravityScale = 2f;
 
         Jump();  // กระโดดครั้งแรกเมื่อเริ่มเกม
@@ -123,6 +124,28 @@ public class Player : MonoBehaviour
         if (isInvincible) return;
 
         currentHealth -= dmg;
+
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        if (currentHealth == transformAtHP)
+            TransformSprite();
+
+        if (currentHealth > 0)
+        {
+            StartCoroutine(InvincibleRoutine());
+            StartCoroutine(ResetAndLockY());
+        }
+        else
+        {
+            Die();
+        }
+    }
+    public void Heal(int heal)
+    {
+        if (isInvincible) return;
+
+        currentHealth += heal;
 
         if (Hp_UI != null)
             Hp_UI.UpdateHearts();
