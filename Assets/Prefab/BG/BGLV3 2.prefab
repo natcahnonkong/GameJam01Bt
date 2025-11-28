@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6171898759697666952}
   - component: {fileID: 247354634381430519}
   m_Layer: 0
-  m_Name: BG2 2
+  m_Name: BGLV3 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1184344076765769873, guid: 30f44699ec45bdf4f87659559f746c17, type: 3}
+  m_Sprite: {fileID: 4345840330999195731, guid: 9032da82cdfb1ba4d8fb02d6b89a035c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -129,7 +129,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 15.26, y: 10.79}
+    oldSize: {x: 15.14, y: 10.79}
     newSize: {x: 15.19, y: 10.79}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d035cff2e46bda9428e422016d27ab9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dmg: 1
 --- !u!114 &247354634381430519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,3 +317,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d035cff2e46bda9428e422016d27ab9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dmg: 0

@@ -147,6 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d035cff2e46bda9428e422016d27ab9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dmg: 0
 --- !u!1 &1323540221713982776
 GameObject:
   m_ObjectHideFlags: 0
@@ -161,7 +162,7 @@ GameObject:
   - component: {fileID: 2867449366864517119}
   - component: {fileID: 3899105436689726422}
   m_Layer: 0
-  m_Name: BG3 (1)
+  m_Name: BG3 (1) 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -296,6 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d035cff2e46bda9428e422016d27ab9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dmg: 1
 --- !u!114 &3899105436689726422
 MonoBehaviour:
   m_ObjectHideFlags: 0

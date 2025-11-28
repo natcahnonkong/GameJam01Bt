@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
 
-public class Player : MonoBehaviour
+public class PlayerLV2 : MonoBehaviour
 {
     [Header("Jump Settings")]
     public float jumpForce = 5f;
@@ -11,8 +11,11 @@ public class Player : MonoBehaviour
     public static bool GameStarted = false;
 
     [Header("Health Settings")]
-    public int maxHealth = 3;
+    public int maxHealth = 5;
+    public int transformAtHP = 2;
+    public Sprite transformedSprite;
     public int currentHealth;
+    public int currentAnimal = 0;
 
     [Header("Invincible Settings")]
     public float invincibleDuration = 1f;
@@ -24,72 +27,57 @@ public class Player : MonoBehaviour
     public float lockYDuration = 1f;
     public bool isYLocked = false;
 
-    [Header("Collect System")]
-    public int animalsCollected = 0;
-    public int animalsNeeded = 3;   // ชนะเมื่อเก็บ 3 ตัว
-
-    [Header("Audio Settings")]
-    public AudioSource audioSource;
-    public AudioClip jumpSFX;
-
     private Rigidbody2D rb;
     private SpriteRenderer sr;
 
-    public Hp_UI hpUI;
-    public Animal_UI animalUI;
-    public WinUI winUI;
+    private Hp_UI Hp_UI;
+    private Animal_UI Animal_UI;
+
+    [Header("Audio Settings")]
+    public AudioSource audioSource;
+    public AudioClip jump_sfx;
 
 
-    // ---------------------------------------------------
-    // AWAKE
-    // ---------------------------------------------------
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
-
-        if (audioSource == null)
-            audioSource = GetComponent<AudioSource>();
-
-        rb.gravityScale = 0; // ยังไม่ตกจนกว่าจะคลิกแรก
+        audioSource = GetComponent<AudioSource>();
+        rb.gravityScale = 0;   // ยังไม่ตกจนกว่าจะคลิกครั้งแรก
     }
 
-
-    // ---------------------------------------------------
-    // START
-    // ---------------------------------------------------
     private void Start()
     {
         currentHealth = maxHealth;
+        Hp_UI = FindObjectOfType<Hp_UI>();
 
-        hpUI = FindObjectOfType<Hp_UI>();
-        animalUI = FindObjectOfType<Animal_UI>();
+        // อัปเดตหัวใจตอนเริ่มฉาก
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
 
-        if (hpUI != null)
-            hpUI.UpdateHearts();
-
-        if (animalUI != null)
-            animalUI.UpdateAnimals();
+        // รีเซตสถานะต่างๆ เมื่อเริ่ม Scene
+        isInvincible = false;
+        isYLocked = false;
     }
 
-
-    // ---------------------------------------------------
-    // UPDATE
-    // ---------------------------------------------------
     private void Update()
     {
-        // ถ้ายังไม่เริ่มเกม → รอคลิกแรก
+        // ยังไม่เริ่มเกม → รอคลิกแรก
         if (!GameStarted)
         {
             if (Input.GetMouseButtonDown(0))
+            {
                 StartGame();
+                
+            }
+
             return;
         }
 
         // ระหว่างล็อค Y ห้ามกระโดด
         if (isYLocked) return;
 
-        // กระโดด
+        // กดเพื่อกระโดด
         if (Input.GetMouseButtonDown(0))
         {
             Jump();
@@ -103,15 +91,19 @@ public class Player : MonoBehaviour
     void StartGame()
     {
         GameStarted = true;
+        Debug.Log("GAME STARTED!!");
         rb.gravityScale = 2f;
 
-        Jump();  // กระโดดตอนเริ่ม
+        Jump();  // กระโดดครั้งแรกเมื่อเริ่มเกม
 
-        if (audioSource != null && jumpSFX != null)
-            audioSource.PlayOneShot(jumpSFX);
+        // เล่นเสียงตอนเริ่มเกมด้วย
+        if (audioSource != null && jump_sfx != null)
+            audioSource.PlayOneShot(jump_sfx);
 
-        hpUI?.UpdateHearts();
-        animalUI?.UpdateAnimals();
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        GameSpeedManager.SpeedMultiplier = 1f;
     }
 
 
@@ -120,11 +112,17 @@ public class Player : MonoBehaviour
     // ---------------------------------------------------
     void Jump()
     {
+        Debug.Log("JUMP CALLED");
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
 
-        if (audioSource != null && jumpSFX != null)
-            audioSource.PlayOneShot(jumpSFX);
+        if (audioSource == null)
+            Debug.Log("AUDIO SOURCE = NULL");
+        if (jump_sfx == null)
+            Debug.Log("JUMP SFX = NULL");
+
+        audioSource.Play();
     }
+
 
 
     // ---------------------------------------------------
@@ -136,14 +134,16 @@ public class Player : MonoBehaviour
 
         currentHealth -= dmg;
 
-        if (hpUI != null)
-            hpUI.UpdateHearts();
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        if (currentHealth == transformAtHP)
+            TransformSprite();
 
         if (currentHealth > 0)
         {
             StartCoroutine(InvincibleRoutine());
             StartCoroutine(ResetAndLockY());
-            CheckWinCondition();
         }
         else
         {
@@ -156,14 +156,18 @@ public class Player : MonoBehaviour
 
         currentHealth += heal;
 
-        if (hpUI != null)
-            hpUI.UpdateHearts();
+        if (Hp_UI != null)
+            Hp_UI.UpdateHearts();
+
+        if (currentHealth == transformAtHP)
+            TransformSprite();
 
         if (currentHealth > 0)
         {
             StartCoroutine(InvincibleRoutine());
             StartCoroutine(ResetAndLockY());
-            CheckWinCondition();
+        
+      
         }
         else
         {
@@ -171,8 +175,21 @@ public class Player : MonoBehaviour
         }
     }
 
+
+
+
     // ---------------------------------------------------
-    // INVINCIBLE FLASH ROUTINE
+    // เปลี่ยน Sprite เมื่อ HP ลดถึงค่าที่กำหนด
+    // ---------------------------------------------------
+    void TransformSprite()
+    {
+        if (transformedSprite != null)
+            sr.sprite = transformedSprite;
+    }
+
+
+    // ---------------------------------------------------
+    // INVINCIBLE + กระพริบ
     // ---------------------------------------------------
     IEnumerator InvincibleRoutine()
     {
@@ -193,7 +210,7 @@ public class Player : MonoBehaviour
 
 
     // ---------------------------------------------------
-    // RESET & LOCK Y
+    // RESET Y + LOCK Y
     // ---------------------------------------------------
     IEnumerator ResetAndLockY()
     {
@@ -212,44 +229,12 @@ public class Player : MonoBehaviour
 
 
     // ---------------------------------------------------
-    // COLLECT ANIMAL
-    // ---------------------------------------------------
-    public void CollectAnimal()
-    {
-        animalsCollected++;
-
-        if (animalUI != null)
-            animalUI.UpdateAnimals();
-
-        CheckWinCondition();
-    }
-
-
-
-    // ---------------------------------------------------
-    // WIN CONDITION
-    // ---------------------------------------------------
-    void CheckWinCondition()
-    {
-        if (animalsCollected >= 3 && currentHealth > 3)
-        {
-            if (winUI != null)
-                winUI.ShowWin();
-
-            GameStarted = false;
-            rb.gravityScale = 0;
-            rb.linearVelocity = Vector2.zero;
-            this.enabled = false;
-        }
-    }
-
-
-
-    // ---------------------------------------------------
     // DIE
     // ---------------------------------------------------
     void Die()
     {
+        Debug.Log("Player Died!");
+
         GameStarted = false;
 
         rb.linearVelocity = Vector2.zero;

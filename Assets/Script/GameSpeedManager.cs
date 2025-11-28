@@ -12,7 +12,7 @@ public class GameSpeedManager : MonoBehaviour
     {
         if (!Player.GameStarted)
         {
-            Debug.Log("ยังไม่เริ่ม SpeedMultiplier = " + GameSpeedManager.SpeedMultiplier);
+            Debug.Log("SpeedMultiplier = " + GameSpeedManager.SpeedMultiplier);
             return;
         }
 
